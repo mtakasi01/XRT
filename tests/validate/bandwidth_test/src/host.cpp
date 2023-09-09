@@ -72,6 +72,7 @@ int main(int argc, char** argv) {
     bool chk_hbm_mem = false;
     std::string filename = "/platform.json";
     auto platform_json = boost::filesystem::path(test_path) / filename;
+    std::vector<std::string>bank_names;
 
     try {
         boost::property_tree::ptree load_ptree_root;
@@ -87,7 +88,16 @@ int main(int argc, char** argv) {
             if (sValue == "HBM") {
                 chk_hbm_mem = true;
             }
-        }
+
+	    else if (sValue == "DDR") {
+            	auto banks=pt_mem_entry.get_child("banks");
+            	for (const auto&bank:banks) {
+ 		    auto bank_name=bank.second.get<std::string>("name");
+	            bank_names.push_back(bank_name);
+		    }
+		}
+	   }
+
         if (chk_hbm_mem) {
             // As HBM is part of platform, number of ddr kernels is total count reduced by 1(single HBM)
             num_kernel_ddr = num_kernel - 1;
@@ -160,7 +170,8 @@ int main(int argc, char** argv) {
         }
     }
 
-    double max_throughput = 0;
+    std::vector<double>bank_throughput_values(num_kernel_ddr,0.0);
+
     int reps = stoi(iter_cnt);
     if (num_kernel_ddr) {
         // Starting at 4K and going up to 16M with increments of power of 2
@@ -222,46 +233,51 @@ int main(int argc, char** argv) {
                 OCL_CHECK(err, err = q.finish());
             }
 
-            auto time_start = std::chrono::high_resolution_clock::now();
 
             for (int i = 0; i < num_kernel_ddr; i++) {
+
+		auto time_start = std::chrono::high_resolution_clock::now();
+
                 OCL_CHECK(err, err = q.enqueueTask(krnls[i]));
-            }
-            q.finish();
-            auto time_end = std::chrono::high_resolution_clock::now();
+		q.finish();
 
-            for (int i = 0; i < num_kernel_ddr; i++) {
+            	auto time_end = std::chrono::high_resolution_clock::now();         
+
                 OCL_CHECK(err, err = q.enqueueReadBuffer(output_buffer[i], CL_TRUE, 0, vector_size_bytes,
                                                          output_host[i].data(), nullptr, nullptr));
                 OCL_CHECK(err, err = q.finish());
-            }
+			      
+			//check
+                	for (uint32_t j = 0; j < data_size; j++) {
+                    		if (output_host[i][j] != input_host[j]) {
+                        		std::cout << "ERROR : kernel failed to copy entry " << j << " input " << (uint32_t)input_host[j]
+                                  	<< " output " << (uint32_t)output_host[i][j] << std::endl;
+                        		return EXIT_FAILURE;
+                    		}
+                	}
+            
 
-            // check
-            for (int i = 0; i < num_kernel_ddr; i++) {
-                for (uint32_t j = 0; j < data_size; j++) {
-                    if (output_host[i][j] != input_host[j]) {
-                        std::cout << "ERROR : kernel failed to copy entry " << j << " input " << (uint32_t)input_host[j]
-                                  << " output " << (uint32_t)output_host[i][j] << std::endl;
-                        return EXIT_FAILURE;
-                    }
-                }
-            }
+            	double usduration =
+                	(double)(std::chrono::duration_cast<std::chrono::nanoseconds>(time_end - time_start).count() / reps);
 
-            double usduration =
-                (double)(std::chrono::duration_cast<std::chrono::nanoseconds>(time_end - time_start).count() / reps);
+		double dnsduration = (double)usduration;
+		double dsduration = dnsduration / ((double)1000000000); // Convert the duration from nanoseconds to seconds
+            	double bpersec = data_size / dsduration;
+            	double mbpersec = (2 * bpersec) / ((double)1024 * 1024); // Convert b/sec to mb/sec
+            
+		total_time += dsduration;
+		bank_throughput_values[i] = std::max(bank_throughput_values[i], mbpersec);
 
-            double dnsduration = (double)usduration;
-            double dsduration = dnsduration / ((double)1000000000); // Convert the duration from nanoseconds to seconds
-            double bpersec = (data_size * num_kernel_ddr) / dsduration;
-            double mbpersec = (2 * bpersec) / ((double)1024 * 1024); // Convert b/sec to mb/sec
+	    }
 
-            if (mbpersec > max_throughput) max_throughput = mbpersec;
-        }
+	}
 
-        std::cout << "Throughput (Type: DDR) (Bank count: " << num_kernel_ddr << ") : " << max_throughput << "MB/s\n";
+	for (int i=0;i<num_kernel_ddr;i++)
+		std::cout<< " Throughput: " << bank_throughput_values[i] << "MB/s" << " Type: DDR" <<" Memory_Tag: "<<bank_names[i]<<"\n";
+
     }
     if (chk_hbm_mem) {
-        max_throughput = 0;
+        double max_throughput = 0;
         // Starting at 4K and going up to 16M with increments of power of 2
         for (uint32_t i = 4 * 1024; i <= 16 * 1024 * 1024; i *= 2) {
             unsigned int data_size = i;
