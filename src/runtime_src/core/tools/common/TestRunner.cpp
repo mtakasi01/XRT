@@ -353,7 +353,7 @@ TestRunner::runTestCase( const std::shared_ptr<xrt_core::device>& _dev, const st
       while(str != std::string::npos) {
         auto end = os_stdout.str().find("\n", str);
         logger(_ptTest, "Details", os_stdout.str().substr(str, end - str));
-	 str = os_stdout.str().find("Throughput" , end);
+	str = os_stdout.str().find("Throughput" , end);
       }
     }
   }
