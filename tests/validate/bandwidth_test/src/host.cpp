@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
     bool chk_hbm_mem = false;
     std::string filename = "/platform.json";
     auto platform_json = boost::filesystem::path(test_path) / filename;
-    std::vector<std::string>bank_names;
+    std::vector<std::string> bank_names;
 
     try {
         boost::property_tree::ptree load_ptree_root;
@@ -86,16 +86,16 @@ int main(int argc, char** argv) {
             boost::property_tree::ptree pt_mem_entry = mem_entry.second;
             auto sValue = pt_mem_entry.get<std::string>("type");
             if (sValue == "HBM") {
-                chk_hbm_mem = true;
+        	chk_hbm_mem = true;
             }
 	    else if (sValue == "DDR") {
-		    auto banks=pt_mem_entry.get_child("banks");
-	            for (const auto&bank:banks) {
-			auto bank_name=bank.second.get<std::string>("name");
-	                bank_names.push_back(bank_name);
-		       }
-		  }
-	   }
+		     auto banks=pt_mem_entry.get_child("banks");
+	             for (const auto&bank:banks) {
+			  auto bank_name=bank.second.get<std::string>("name");
+	                  bank_names.push_back(bank_name);
+		        }
+		   }
+	    }
 
         if (chk_hbm_mem) {
             // As HBM is part of platform, number of ddr kernels is total count reduced by 1(single HBM)
@@ -171,7 +171,7 @@ int main(int argc, char** argv) {
     }
 
     double max_throughput = 0;
-    std::vector<double> bank_throughput_values(num_kernel_ddr,0.0);
+    std::vector<double> bank_throughput_values (num_kernel_ddr,0.0);
 
     int reps = stoi(iter_cnt);
     if (num_kernel_ddr) {
