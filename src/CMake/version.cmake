@@ -82,7 +82,6 @@ configure_file(
   ${XRT_SOURCE_DIR}/CMake/config/version.json.in
   ${XRT_BINARY_DIR}/gen/version.json
 )
-
 install(FILES ${XRT_BINARY_DIR}/gen/version.h DESTINATION ${XRT_INSTALL_INCLUDE_DIR})
 if (${XRT_NATIVE_BUILD} STREQUAL "yes")
 install(FILES ${XRT_BINARY_DIR}/gen/version.json DESTINATION ${XRT_INSTALL_DIR})

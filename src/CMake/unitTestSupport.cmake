@@ -53,7 +53,6 @@ function(xrt_util_create_unittest_wrapper TEST_DIRECTORY TEST_COMMAND WRAPPER_FI
   # Step 1a: Create working temporary directory
   set(TEMP_DIR "${TEST_DIRECTORY}/tmp")
   execute_process(COMMAND "${CMAKE_COMMAND}" -E make_directory "${TEMP_DIR}")
-
   # Step 1b: Create the script in the temporary directory
   configure_file(
     "${XRT_SOURCE_DIR}/CMake/config/testBashWrapper.sh.in"

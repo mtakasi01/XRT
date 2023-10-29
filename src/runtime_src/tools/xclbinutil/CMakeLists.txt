@@ -4,9 +4,28 @@
 # Signing xclbin images are currently only support on Linux
 
 # cmake 3.19 and after emits warning about this policy not being set
+
+cmake_minimum_required(VERSION 3.10)
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19)
   cmake_policy(SET CMP0110 NEW)
 endif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19)
+
+if (NOT DEFINED XRT_NATIVE_BUILD)
+        set (XRT_NATIVE_BUILD "no")
+        find_package(Boost
+         REQUIRED COMPONENTS filesystem system program_options)
+        set (XRT_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR})
+        set (XRT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../../)
+        set (XRT_BUILD_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+        set (XRT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+        set (XRT_INSTALL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
+        set (XRT_INSTALL_UNWRAPPED_DIR "${CMAKE_CURRENT_BINARY_DIR}/unwrapped")
+        set (XRT_INSTALL_BIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin")
+        include(${CMAKE_CURRENT_SOURCE_DIR}/../../../CMake/unitTestSupport.cmake)
+        include(${CMAKE_CURRENT_SOURCE_DIR}/../../../CMake/version.cmake)
+        include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../runtime_src/core/include)
+
+endif()
 
 if(NOT WIN32)
   find_package(OpenSSL REQUIRED)
@@ -85,9 +104,15 @@ if(NOT WIN32)
      target_compile_definitions(${XCLBINUTIL_NAME} PRIVATE ENABLE_JSON_SCHEMA_VALIDATION)
    endif()
 endif()
+message ("Path of XRT INSTALL UNWRAPPED DIR: ${XRT_INSTALL_UNWRAPPED_DIR}")
+message ("Path of XRT INSTALL BIN DIR: ${XRT_INSTALL_BIN_DIR}")
+message ("Path of cmake source  DIR: ${CMAKE_SOURCE_DIR}")
+message ("Path of cmake current source  DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+ message ("Path of cmake BIN DIR: ${CMAKE_BINARY_DIR}")
+message ("Path of current cmake  BIN DIR: ${CMAKE_CURRENT_BINARY_DIR}")
+
 
 target_link_libraries(${XCLBINUTIL_NAME} PRIVATE ${Boost_LIBRARIES} Threads::Threads)
-
 install (TARGETS ${XCLBINUTIL_NAME} RUNTIME DESTINATION ${XRT_INSTALL_UNWRAPPED_DIR})
 install (PROGRAMS ${XRT_LOADER_SCRIPTS} DESTINATION ${XRT_INSTALL_BIN_DIR})
 
