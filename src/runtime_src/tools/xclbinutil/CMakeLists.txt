@@ -4,9 +4,28 @@
 # Signing xclbin images are currently only support on Linux
 
 # cmake 3.19 and after emits warning about this policy not being set
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
+
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19)
   cmake_policy(SET CMP0110 NEW)
 endif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19)
+
+if (NOT DEFINED XRT_NATIVE_BUILD)
+        set (XRT_NATIVE_BUILD "no")
+        find_package(Boost
+         REQUIRED COMPONENTS filesystem system program_options)
+        set (XRT_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR})
+        set (XRT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../../)
+        set (XRT_BUILD_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+        set (XRT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+        set (XRT_INSTALL_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
+        set (XRT_INSTALL_BIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin")
+        set (XRT_INSTALL_UNWRAPPED_DIR "${XRT_INSTALL_BIN_DIR}/unwrapped")
+        include (${CMAKE_CURRENT_SOURCE_DIR}/../../../CMake/unitTestSupport.cmake)
+        include (${CMAKE_CURRENT_SOURCE_DIR}/../../../CMake/version.cmake)
+        include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../runtime_src/core/include)
+
+endif()
 
 if(NOT WIN32)
   find_package(OpenSSL REQUIRED)
