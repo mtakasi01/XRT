@@ -170,7 +170,8 @@ message("-- Compiler: ${CMAKE_CXX_COMPILER} ${CMAKE_C_COMPILER}")
 include (CMake/lint.cmake)
 
 xrt_add_subdirectory(runtime_src)
-if (NOT BUILD_TARGET)
+
+if(NOT ${XRT_ONLY_XCLBINUTIL} STREQUAL "ON")
    #XMA settings START
    set(XMA_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
    set(XMA_INSTALL_DIR "${XRT_INSTALL_DIR}")
@@ -192,31 +193,31 @@ if (NOT BUILD_TARGET)
    install (FILES ${PY_TEST_SRC}
      PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
      DESTINATION ${XRT_INSTALL_DIR}/test)
-
    xrt_add_subdirectory("../tests/validate" "${CMAKE_CURRENT_BINARY_DIR}/validate_build")
    message("-- XRT version: ${XRT_VERSION_STRING}")
+endif()
 # -- CPack
 include (CMake/cpackLin.cmake)
-
+if(NOT ${XRT_ONLY_XCLBINUTIL} STREQUAL "ON")
 set (XRT_DKMS_DRIVER_SRC_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/runtime_src/core")
 
 include (CMake/dkms.cmake)
 include (CMake/dkms-aws.cmake)
 include (CMake/dkms-azure.cmake)
 include (CMake/dkms-container.cmake)
-
 # --- ICD ---
 include (CMake/icd.cmake)
 
 # --- Change Log ---
 include (CMake/changelog.cmake)
 
+endif()
 # --- Package Config ---
 include (CMake/pkgconfig.cmake)
 
 # --- Coverity Support ---
 include (CMake/coverity.cmake)
-endif()
+
 # --- Find Package Support ---
 include (CMake/findpackage.cmake)
 set (CTAGS "${XRT_SOURCE_DIR}/runtime_src/tools/scripts/tags.sh")

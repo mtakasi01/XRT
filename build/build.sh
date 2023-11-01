@@ -209,7 +209,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         -xclbinutil)
-            cmake_flags+=" -DBUILD_TARGET=xclbinutil"
+            cmake_flags+=" -DXRT_ONLY_XCLBINUTIL=ON"
             shift
             ;;
         -verbose)
