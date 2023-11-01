@@ -27,11 +27,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 message("-- Host system processor is ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 message("-- Target system processor is ${CMAKE_SYSTEM_PROCESSOR}")
 
+if(DEFINED BUILD_TARGET AND NOT ${BUILD_TARGET} STREQUAL "xclbinutil")
+        message(FATAL_ERROR "Build target should be set to xclbinutil")
+endif()
+
 set(XRT_NATIVE_BUILD "yes")
 if (NOT ${CMAKE_SYSTEM_PROCESSOR} STREQUAL ${CMAKE_HOST_SYSTEM_PROCESSOR})
   set(XRT_NATIVE_BUILD "no")
 endif()
-
 if ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
   set(XRT_WARN_OPTS
   -Wall
@@ -126,7 +129,9 @@ if (${XRT_NATIVE_BUILD} STREQUAL "yes")
   else()
     include(CMake/nativeLnx.cmake)
   endif()
+  if (NOT BUILD_TARGET)
   xrt_include(CMake/nativeTests.cmake)
+  endif()
 else()
   include(CMake/embedded_system.cmake)
 endif()
