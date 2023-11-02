@@ -6,7 +6,7 @@
 
 if( NOT WIN32)
 
-        if(${CMAKE_BUILD_TYPE} STREQUAL "Release" AND ${XRT_NATIVE_BUILD} STREQUAL "yes" AND ${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release" AND ${XRT_NATIVE_BUILD} STREQUAL "yes" AND ${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
   xrt_add_subdirectory(doc)
 endif()
 
