@@ -171,7 +171,7 @@ include (CMake/lint.cmake)
 
 xrt_add_subdirectory(runtime_src)
 
-if(${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
+if(NOT ${XCLBINUTIL_ONLY_BUILD})
    #XMA settings START
    set(XMA_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
    set(XMA_INSTALL_DIR "${XRT_INSTALL_DIR}")
@@ -199,7 +199,7 @@ endif()
 # -- CPack
 include (CMake/cpackLin.cmake)
 
-if(${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
+if(NOT ${XCLBINUTIL_ONLY_BUILD})
 set (XRT_DKMS_DRIVER_SRC_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/runtime_src/core")
 
 include (CMake/dkms.cmake)

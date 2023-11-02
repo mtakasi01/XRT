@@ -209,7 +209,7 @@ while [ $# -gt 0 ]; do
             shift
             ;;
         -xclbinutil)
-            cmake_flags+=" -DXCLBINUTIL_ONLY_BUILD=yes"
+            cmake_flags+=" -DXCLBINUTIL_ONLY_BUILD=ON"
             shift
             ;;
         -verbose)

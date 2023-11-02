@@ -44,7 +44,7 @@ install (
 # This will generate a file that details all targets we have marked for export
 # as part of the xrt-targets export group
 # It will provide information such as the library file names and locations post install
-if (${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
+if (NOT ${XCLBINUTIL_ONLY_BUILD})
    if (NOT WIN32)
    install(
      EXPORT xrt-targets
@@ -53,7 +53,7 @@ if (${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
      )
    endif()
 
-   if (${XRT_NATIVE_BUILD} STREQUAL "yes")
+   if (NOT ${XRT_NATIVE_BUILD})
    install(
      EXPORT xrt-dev-targets
      NAMESPACE ${PROJECT_NAME}::

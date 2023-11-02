@@ -6,7 +6,7 @@
 
 if( NOT WIN32)
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Release" AND ${XRT_NATIVE_BUILD} STREQUAL "yes" AND ${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
+    if(${CMAKE_BUILD_TYPE} STREQUAL "Release" AND ${XRT_NATIVE_BUILD} STREQUAL "yes" AND NOT ${XCLBINUTIL_ONLY_BUILD})
   xrt_add_subdirectory(doc)
 endif()
 
@@ -30,7 +30,7 @@ endif(XRT_ENABLE_WERROR)
 if (${XRT_NATIVE_BUILD} STREQUAL "yes")
   add_compile_options( ${XRT_WARN_OPTS} )
 endif()
-if (${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")   
+if (NOT ${XCLBINUTIL_ONLY_BUILD})   
    xrt_add_subdirectory(xdp)
    xrt_add_subdirectory(xocl)
    xrt_add_subdirectory(xrt)
@@ -50,7 +50,7 @@ endif()
 set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-Bsymbolic")
 set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,defs")
 
-if (${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
+if (NOT ${XCLBINUTIL_ONLY_BUILD})
    xrt_add_subdirectory(core)
 endif()
 
