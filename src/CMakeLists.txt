@@ -5,7 +5,8 @@ cmake_minimum_required(VERSION 3.5.0)
 project(XRT)
 set(PROJECT_DESCRIPTION "https://github.com/Xilinx/XRT")
 
-option(XRT_ONLY_XCLBINUTIL "Option to enable and disabel build only xclbinutil" OFF)
+option(XCLBINUTIL_ONLY_BUILD "Option to enable and disable build only xclbinutil" no)
+
 
 # Include utility functions
 include(CMake/utilities.cmake)
@@ -33,6 +34,7 @@ set(XRT_NATIVE_BUILD "yes")
 if (NOT ${CMAKE_SYSTEM_PROCESSOR} STREQUAL ${CMAKE_HOST_SYSTEM_PROCESSOR})
   set(XRT_NATIVE_BUILD "no")
 endif()
+
 if ( ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" )
   set(XRT_WARN_OPTS
   -Wall
@@ -74,6 +76,7 @@ set (CMAKE_INSTALL_PREFIX "/opt/xilinx")
 if (${XRT_NATIVE_BUILD} STREQUAL "no")
   set (CMAKE_INSTALL_PREFIX "/usr")
 endif()
+
 # Enable AIE even on x86.  This is POC, once
 # complete we will remove the need for these
 # macros and defines.
@@ -126,7 +129,7 @@ if (${XRT_NATIVE_BUILD} STREQUAL "yes")
   else()
     include(CMake/nativeLnx.cmake)
   endif()
-  if (NOT ${XRT_ONLY_XCLBINUTIL} STREQUAL "ON")
+  if (${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
   xrt_include(CMake/nativeTests.cmake)
   endif()
 else()

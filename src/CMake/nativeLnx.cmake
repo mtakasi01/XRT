@@ -171,7 +171,7 @@ include (CMake/lint.cmake)
 
 xrt_add_subdirectory(runtime_src)
 
-if(NOT ${XRT_ONLY_XCLBINUTIL} STREQUAL "ON")
+if(${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
    #XMA settings START
    set(XMA_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
    set(XMA_INSTALL_DIR "${XRT_INSTALL_DIR}")
@@ -198,7 +198,8 @@ if(NOT ${XRT_ONLY_XCLBINUTIL} STREQUAL "ON")
 endif()
 # -- CPack
 include (CMake/cpackLin.cmake)
-if(NOT ${XRT_ONLY_XCLBINUTIL} STREQUAL "ON")
+
+if(${XCLBINUTIL_ONLY_BUILD} STREQUAL "no")
 set (XRT_DKMS_DRIVER_SRC_BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/runtime_src/core")
 
 include (CMake/dkms.cmake)
@@ -220,5 +221,6 @@ include (CMake/coverity.cmake)
 
 # --- Find Package Support ---
 include (CMake/findpackage.cmake)
+
 set (CTAGS "${XRT_SOURCE_DIR}/runtime_src/tools/scripts/tags.sh")
 include (CMake/tags.cmake)
