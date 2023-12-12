@@ -87,7 +87,7 @@ target_link_libraries(xrt_coreutil_static
 if (NOT WIN32)
   # Additional link dependencies for xrt_coreutil
   # xrt_uuid.h depends on uuid
-  target_link_libraries(xrt_coreutil PRIVATE pthread dl PUBLIC uuid)
+  target_link_libraries(xrt_coreutil PRIVATE pthread dl PUBLIC uuid stdc++fs)
 
   # Targets of xrt_coreutil_static must link with these additional
   # system libraries

@@ -26,6 +26,7 @@ target_link_libraries(mpd
   uuid
   dl
   udev
+  stdc++fs
   )
 install (TARGETS mpd RUNTIME DESTINATION ${XRT_INSTALL_DIR}/bin)
 
@@ -49,6 +50,7 @@ target_link_libraries(msd
   ${Boost_SYSTEM_LIBRARY}
   uuid
   dl
+  stdc++fs
   )
 install (TARGETS msd RUNTIME DESTINATION ${XRT_INSTALL_DIR}/bin)
 

@@ -67,6 +67,7 @@ target_link_libraries(xrt_core_static
   dl
   rt
   pthread
+  stdc++fs
   )
 
 install(TARGETS xrt_core

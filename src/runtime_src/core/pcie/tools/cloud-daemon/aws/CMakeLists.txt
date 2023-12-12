@@ -44,6 +44,7 @@ if(${INTERNAL_TESTING_FOR_AWS})
     pthread
     rt
     dl
+    stdc++fs
     )
 else()
   include_directories(${AWS_FPGA_REPO_DIR}/sdk/userspace/include/) # path to fpga_mgmt.h

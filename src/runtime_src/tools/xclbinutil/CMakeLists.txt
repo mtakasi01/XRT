@@ -76,7 +76,7 @@ add_executable(${XCLBINUTIL_NAME} ${XCLBINUTIL_SRCS})
 
 # Signing xclbin images currently is not support on windows
 if(NOT WIN32)
-  target_link_libraries(${XCLBINUTIL_NAME} PRIVATE crypto)
+  target_link_libraries(${XCLBINUTIL_NAME} PRIVATE crypto stdc++fs)
 endif()
 
 # Add compile definitions
@@ -176,7 +176,7 @@ if (GTEST_FOUND)
     target_link_libraries(${UNIT_TEST_NAME} PRIVATE Boost::program_options Boost::system )
     target_link_libraries(${UNIT_TEST_NAME} PRIVATE ${GTEST_BOTH_LIBRARIES})
   else()
-    target_link_libraries(${UNIT_TEST_NAME} PRIVATE ${Boost_LIBRARIES} ${GTEST_BOTH_LIBRARIES} pthread crypto)
+    target_link_libraries(${UNIT_TEST_NAME} PRIVATE ${Boost_LIBRARIES} ${GTEST_BOTH_LIBRARIES} pthread crypto stdc++fs)
 
     if(NOT (${RapidJSON_VERSION_MAJOR} EQUAL 0))
       target_compile_definitions(${UNIT_TEST_NAME} PRIVATE ENABLE_JSON_SCHEMA_VALIDATION)
