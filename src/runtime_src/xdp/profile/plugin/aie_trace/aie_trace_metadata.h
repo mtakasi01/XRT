@@ -25,8 +25,11 @@
 #include "xdp/config.h"
 #include "xdp/profile/database/static_info/aie_util.h"
 #include "xdp/profile/database/static_info/aie_constructs.h"
+#include "xdp/profile/database/static_info/filetypes/base_filetype_impl.h"
+
 #include "core/common/device.h"
 #include "core/common/system.h"
+#include "core/include/xrt/xrt_hw_context.h"
 
 namespace xdp {
 
@@ -49,14 +52,14 @@ class AieTraceMetadata {
     
    public:
     int getHardwareGen() {
-      return aie::getHardwareGeneration(aieMeta);
+      return metadataReader->getHardwareGeneration();
     }
     uint16_t getRowOffset() {
-      return aie::getAIETileRowOffset(aieMeta);
+      return metadataReader->getAIETileRowOffset();
     }
     std::unordered_map<std::string, io_config> 
     get_trace_gmios() {
-      return aie::getTraceGMIOs(aieMeta);
+      return metadataReader->getTraceGMIOs();
     }
     std::string getMetricString(uint8_t index) {
       if (index < metricSets[module_type::core].size())
@@ -64,6 +67,9 @@ class AieTraceMetadata {
       else
         return metricSets[module_type::core][0];
     }
+
+    xdp::aie::driver_config getAIEConfigMetadata();
+
 
     bool getUseDelay(){return useDelay;}
     bool getUseUserControl(){return useUserControl;}
@@ -92,6 +98,11 @@ class AieTraceMetadata {
     void setRuntimeMetrics(bool metrics) {runtimeMetrics = metrics;}
     uint64_t getDelay() {return ((useDelay) ? delayCycles : 0);}
 
+    xrt::hw_context getHwContext(){return hwContext;}
+    void setHwContext(xrt::hw_context c) {
+      hwContext = std::move(c);
+    }
+
   private:
     bool useDelay = false;
     bool useUserControl = false;
@@ -112,7 +123,8 @@ class AieTraceMetadata {
     
     std::string counterScheme;
     std::string metricSet;
-    boost::property_tree::ptree aieMeta;
+    boost::property_tree::ptree aie_meta;
+    std::unique_ptr<aie::BaseFiletypeImpl> metadataReader;
     std::map<tile_type, std::string> configMetrics;
     std::map<tile_type, uint8_t> configChannel0;
     std::map<tile_type, uint8_t> configChannel1;
@@ -127,14 +139,20 @@ class AieTraceMetadata {
       { module_type::core,     {"functions", "functions_partial_stalls", 
                                 "functions_all_stalls", "all"} },
       { module_type::mem_tile, {"input_channels", "input_channels_stalls", 
-                                "output_channels", "output_channels_stalls"} },
+                                "output_channels", "output_channels_stalls",
+                                "s2mm_channels", "s2mm_channels_stalls", 
+                                "mm2s_channels", "mm2s_channels_stalls",
+                                "memory_conflicts1", "memory_conflicts2"} },
       { module_type::shim,     {"input_ports", "output_ports",
                                 "input_ports_stalls", "output_ports_stalls", 
-                                "input_ports_details", "output_ports_details"} }
+                                "input_ports_details", "output_ports_details",
+                                "mm2s_ports", "s2mm_ports",
+                                "mm2s_ports_stalls", "s2mm_ports_stalls", 
+                                "mms2_ports_details", "s2mm_ports_details"} }
     };
 
     void* handle;
-    
+    xrt::hw_context hwContext;
   };
 
 }

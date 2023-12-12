@@ -17,6 +17,7 @@
 class TestRunner : public JSONConfigurable {
   public:
     virtual boost::property_tree::ptree run(std::shared_ptr<xrt_core::device> dev) = 0;
+    boost::property_tree::ptree startTest(std::shared_ptr<xrt_core::device> dev);
     virtual void set_param(const std::string key, const std::string value){}
     bool is_explicit() const { return m_explicit; };
     virtual bool getConfigHidden() const { return is_explicit(); };
@@ -27,6 +28,8 @@ class TestRunner : public JSONConfigurable {
     boost::property_tree::ptree get_test_header();
     std::string findXclbinPath( const std::shared_ptr<xrt_core::device>& _dev,
                       boost::property_tree::ptree& _ptTest);
+    std::string findDPUPath( const std::shared_ptr<xrt_core::device>& _dev,
+                              boost::property_tree::ptree& _ptTest, const std::string dpu_name);
 
   // Child class helper methods
   protected:

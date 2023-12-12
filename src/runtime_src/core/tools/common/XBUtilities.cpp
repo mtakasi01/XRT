@@ -7,12 +7,12 @@
 #include "XBUtilitiesCore.h"
 
 // Local - Include Files
-#include "core/common/error.h"
-#include "core/common/info_vmr.h"
-#include "core/common/utils.h"
-#include "core/common/message.h"
-
+#include "common/error.h"
+#include "common/info_vmr.h"
+#include "common/utils.h"
+#include "common/message.h"
 #include "common/system.h"
+#include "common/sysinfo.h"
 
 // 3rd Party Library - Include Files
 #include <boost/algorithm/string/split.hpp>
@@ -251,7 +251,7 @@ void
 XBUtilities::xrt_version_cmp(bool isUserDomain)
 {
   boost::property_tree::ptree pt_xrt;
-  xrt_core::get_xrt_info(pt_xrt);
+  xrt_core::sysinfo::get_xrt_info(pt_xrt);
   const boost::property_tree::ptree empty_ptree;
 
   std::string xrt_version = pt_xrt.get<std::string>("version", "<unknown>");
@@ -416,28 +416,28 @@ XBUtilities::collect_devices( const std::set<std::string> &_deviceBDFs,
     return device;
   }
 
-// TODO this is a temporary function that will be replaced
-// by something in the shim or device layer.
 static std::string
-tempDeviceMapping(const std::string& deviceName)
+deviceMapping(const xrt_core::query::device_class::type type)
 {
-  if (deviceName.empty())
-    return "";
-
-  if (deviceName.find("Ryzen") != std::string::npos)
+  switch (type) {
+  case xrt_core::query::device_class::type::alveo:
+    return "alveo";
+  case xrt_core::query::device_class::type::ryzen:
     return "aie";
+  }
 
-  return "alveo";
+  return "";
 }
 
 std::string
 XBUtilities::get_device_class(const std::string &deviceBDF, bool in_user_domain)
 {
   if (deviceBDF.empty()) 
-    return tempDeviceMapping("");
+    return "";
 
   std::shared_ptr<xrt_core::device> device = get_device(boost::algorithm::to_lower_copy(deviceBDF), in_user_domain, false);
-  return tempDeviceMapping(xrt_core::device_query_default<xrt_core::query::rom_vbnv>(device, ""));
+  auto device_class = xrt_core::device_query_default<xrt_core::query::device_class>(device, xrt_core::query::device_class::type::alveo);
+  return deviceMapping(device_class);
 }
 
 void
@@ -691,7 +691,7 @@ get_xrt_pretty_version()
 {
   std::stringstream ss;
   boost::property_tree::ptree pt_xrt;
-  xrt_core::get_xrt_info(pt_xrt);
+  xrt_core::sysinfo::get_xrt_info(pt_xrt);
   boost::property_tree::ptree empty_ptree;
 
   ss << boost::format("%-20s : %s\n") % "Version" % pt_xrt.get<std::string>("version", "N/A");

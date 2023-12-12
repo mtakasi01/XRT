@@ -17,7 +17,7 @@
 #include "config_reader.h"
 #include "device.h"
 #include "query_requests.h"
-#include "system.h"
+#include "sysinfo.h"
 #include "utils.h"
 #include <atomic>
 #include <cmath>
@@ -27,6 +27,13 @@
 #include <sstream>
 #include <string>
 #include <boost/algorithm/string.hpp>
+
+#ifdef __linux__
+# include <unistd.h>
+#endif
+#ifdef _WIN32
+# include <process.h>
+#endif
 
 namespace {
 
@@ -53,7 +60,7 @@ std::string
 get_hostname()
 {
   boost::property_tree::ptree pt_os_info;
-  xrt_core::get_os_info(pt_os_info);
+  xrt_core::sysinfo::get_os_info(pt_os_info);
   return pt_os_info.get("hostname", "");
 }
 
@@ -323,6 +330,16 @@ value_to_mac_addr(const uint64_t mac_addr_value)
                                           % ((mac_addr_value >> (0 * 8)) & 0xFF));
 
   return mac_addr;
+}
+
+int
+get_pid()
+{
+#ifdef _WIN32
+  return _getpid();
+#else
+  return getpid();
+#endif
 }
 
 }} // utils, xrt_core

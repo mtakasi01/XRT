@@ -2,16 +2,23 @@
 // Copyright (C) 2019 Xilinx, Inc
 // Copyright (C) 2022 Advanced Micro Devices, Inc. All rights reserved.
 #define XRT_CORE_COMMON_SOURCE
+// Local - Include Files
 #include "system.h"
 #include "device.h"
 #include "module_loader.h"
+
 #include "gen/version.h"
 
 
-#include <vector>
+// System - Include Files
+#include <boost/property_tree/ptree.hpp>
+
 #include <map>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace {
 
@@ -90,25 +97,9 @@ instance()
 }
 
 void
-get_xrt_build_info(boost::property_tree::ptree& pt)
+get_driver_info(boost::property_tree::ptree &pt)
 {
-  pt.put("version",    xrt_build_version);
-  pt.put("branch",     xrt_build_version_branch);
-  pt.put("hash",       xrt_build_version_hash);
-  pt.put("build_date", xrt_build_version_date);
-}
-
-void
-get_xrt_info(boost::property_tree::ptree &pt)
-{
-  get_xrt_build_info(pt);
-  instance().get_xrt_info(pt);
-}
-
-void
-get_os_info(boost::property_tree::ptree& pt)
-{
-  instance().get_os_info(pt);
+  instance().get_driver_info(pt);
 }
 
 void

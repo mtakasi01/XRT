@@ -125,6 +125,21 @@ struct bdf
   }
 };
 
+// Returns static information about the given device
+struct dev_info
+{
+  static std::any
+  get(const xrt_core::device* device, key_type key)
+  {
+    switch (key) {
+    case key_type::device_class:
+      return xrt_core::query::device_class::type::alveo;
+    default:
+      throw query::no_such_key(key);
+    }
+  }
+};
+
 /*
  * sdm_sensor_info query request used to access sensor information from
  * hwmon sysfs directly. It is a data driven approach.
@@ -296,9 +311,9 @@ struct sdm_sensor_info
   } //get_sdm_sensors()
 
   static result_type
-  get(const xrt_core::device* device, key_type, const boost::any& reqType)
+  get(const xrt_core::device* device, key_type, const std::any& reqType)
   {
-    const sdr_req_type req_type = boost::any_cast<query::sdm_sensor_info::req_type>(reqType);
+    const sdr_req_type req_type = std::any_cast<query::sdm_sensor_info::req_type>(reqType);
     auto pdev = get_pcidev(device);
     const std::string target_dir = "hwmon";
     const std::string target_file = "name";
@@ -738,9 +753,9 @@ struct aim_counter
   using result_type = query::aim_counter::result_type;
 
   static result_type
-  get(const xrt_core::device* device, key_type key, const boost::any& dbg_ip_dt)
+  get(const xrt_core::device* device, key_type key, const std::any& dbg_ip_dt)
   {
-    const auto dbg_ip_data = boost::any_cast<query::aim_counter::debug_ip_data_type>(dbg_ip_dt);
+    const auto dbg_ip_data = std::any_cast<query::aim_counter::debug_ip_data_type>(dbg_ip_dt);
 
     std::string aim_name("aximm_mon_");
     aim_name += std::to_string(dbg_ip_data->m_base_address);
@@ -776,9 +791,9 @@ struct am_counter
   using result_type = query::am_counter::result_type;
 
   static result_type
-  get(const xrt_core::device* device, key_type key, const boost::any& dbg_ip_dt)
+  get(const xrt_core::device* device, key_type key, const std::any& dbg_ip_dt)
   {
-    const auto dbg_ip_data = boost::any_cast<query::am_counter::debug_ip_data_type>(dbg_ip_dt);
+    const auto dbg_ip_data = std::any_cast<query::am_counter::debug_ip_data_type>(dbg_ip_dt);
 
     std::string am_name("accel_mon_");
     am_name += std::to_string(dbg_ip_data->m_base_address);
@@ -799,9 +814,9 @@ struct asm_counter
   using result_type = query::asm_counter::result_type;
 
   static result_type
-  get(const xrt_core::device* device, key_type key, const boost::any& dbg_ip_dt)
+  get(const xrt_core::device* device, key_type key, const std::any& dbg_ip_dt)
   {
-    const auto dbg_ip_data = boost::any_cast<query::asm_counter::debug_ip_data_type>(dbg_ip_dt);
+    const auto dbg_ip_data = std::any_cast<query::asm_counter::debug_ip_data_type>(dbg_ip_dt);
 
     std::string asm_name("axistream_mon_");
     asm_name += std::to_string(dbg_ip_data->m_base_address);
@@ -821,9 +836,9 @@ struct lapc_status
   using result_type = query::lapc_status::result_type;
 
   static result_type
-  get(const xrt_core::device* device, key_type key, const boost::any& dbg_ip_dt)
+  get(const xrt_core::device* device, key_type key, const std::any& dbg_ip_dt)
   {
-    const auto dbg_ip_data = boost::any_cast<query::lapc_status::debug_ip_data_type>(dbg_ip_dt);
+    const auto dbg_ip_data = std::any_cast<query::lapc_status::debug_ip_data_type>(dbg_ip_dt);
 
     std::string lapc_name("lapc_");
     lapc_name += std::to_string(dbg_ip_data->m_base_address);
@@ -848,9 +863,9 @@ struct spc_status
   using result_type = query::spc_status::result_type;
 
   static result_type
-  get(const xrt_core::device* device, key_type key, const boost::any& dbg_ip_dt)
+  get(const xrt_core::device* device, key_type key, const std::any& dbg_ip_dt)
   {
-    const auto dbg_ip_data = boost::any_cast<query::spc_status::debug_ip_data_type>(dbg_ip_dt);
+    const auto dbg_ip_data = std::any_cast<query::spc_status::debug_ip_data_type>(dbg_ip_dt);
 
     std::string spc_name("spc_");
     spc_name += std::to_string(dbg_ip_data->m_base_address);
@@ -875,9 +890,9 @@ struct accel_deadlock_status
   using result_type = query::accel_deadlock_status::result_type;
 
   static result_type
-  get(const xrt_core::device* device, key_type key, const boost::any& dbg_ip_dt)
+  get(const xrt_core::device* device, key_type key, const std::any& dbg_ip_dt)
   {
-    const auto dbg_ip_data = boost::any_cast<query::accel_deadlock_status::debug_ip_data_type>(dbg_ip_dt);
+    const auto dbg_ip_data = std::any_cast<query::accel_deadlock_status::debug_ip_data_type>(dbg_ip_dt);
 
     std::string mon_name("accel_deadlock_");
     mon_name += std::to_string(dbg_ip_data->m_base_address);
@@ -915,9 +930,9 @@ struct aie_tiles_status_info
   using result_type = xrt_core::query::aie_tiles_status_info::result_type;
 
   static result_type
-  get(const xrt_core::device* device, key_type key, const boost::any& param)
+  get(const xrt_core::device* device, key_type key, const std::any& param)
   {
-    auto data = boost::any_cast<xrt_core::query::aie_tiles_status_info::parameters>(param);
+    auto data = std::any_cast<xrt_core::query::aie_tiles_status_info::parameters>(param);
     uint32_t cols_filled = 0;
     uint32_t buf_size = data.col_size * data.num_cols;
 
@@ -1040,14 +1055,14 @@ struct sysfs_get : virtual QueryRequestType
     : subdev(s), entry(e)
   {}
 
-  boost::any
+  std::any
   get(const xrt_core::device* device) const
   {
     return sysfs_fcn<typename QueryRequestType::result_type>
       ::get(get_pcidev(device), subdev, entry);
   }
 
-  boost::any
+  std::any
   get(const xrt_core::device* device, query::request::modifier m, const std::string& v) const
   {
     auto ms = (m == query::request::modifier::subdev) ? v.c_str() : subdev;
@@ -1068,9 +1083,9 @@ struct sysfs_put : virtual QueryRequestType
   {}
 
   void
-  put(const xrt_core::device* device, const boost::any& any) const
+  put(const xrt_core::device* device, const std::any& any) const
   {
-    auto value = boost::any_cast<typename QueryRequestType::value_type>(any);
+    auto value = std::any_cast<typename QueryRequestType::value_type>(any);
     sysfs_fcn<typename QueryRequestType::value_type>
       ::put(get_pcidev(device), this->subdev, this->entry, value);
   }
@@ -1087,7 +1102,7 @@ struct sysfs_getput : sysfs_get<QueryRequestType>, sysfs_put<QueryRequestType>
 template <typename QueryRequestType, typename Getter>
 struct function0_get : virtual QueryRequestType
 {
-  boost::any
+  std::any
   get(const xrt_core::device* device) const
   {
     auto k = QueryRequestType::key;
@@ -1098,8 +1113,8 @@ struct function0_get : virtual QueryRequestType
 template <typename QueryRequestType, typename Getter>
 struct function4_get : virtual QueryRequestType
 {
-  boost::any
-  get(const xrt_core::device* device, const boost::any& arg1) const
+  std::any
+  get(const xrt_core::device* device, const std::any& arg1) const
   {
     auto k = QueryRequestType::key;
     return Getter::get(device, k, arg1);
@@ -1333,6 +1348,7 @@ initialize_query_table()
   emplace_func0_request<query::instance,                       instance>();
   emplace_func0_request<query::hotplug_offline,                hotplug_offline>();
   emplace_func0_request<query::clk_scaling_info,               clk_scaling_info>();
+  emplace_func0_request<query::device_class,                   dev_info>();
 
   emplace_func4_request<query::aim_counter,                    aim_counter>();
   emplace_func4_request<query::am_counter,                     am_counter>();

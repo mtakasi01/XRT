@@ -14,7 +14,7 @@
  * under the License.
  */
 
-#define XDP_SOURCE
+#define XDP_PLUGIN_SOURCE
 
 #include "xdp/profile/plugin/aie_debug/aie_debug_plugin.h"
 
@@ -106,28 +106,31 @@ namespace xdp {
   
     try {
       pt::read_json("aie_control_config.json", aie_meta);
+      filetype = aie::readAIEMetadata("aie_control_config.json", aie_meta);
     } catch (...) {
       std::stringstream msg;
-      msg << "The file aie_control_config.json is required in the same directory as the host executable to run AIE Profile.";
+      msg << "The file aie_control_config.json is required in the same directory as the host executable to run AIE Debug.";
       xrt_core::message::send(severity_level::warning, "XRT", msg.str());
       return;
     }
 
     context = xrt_core::hw_context_int::create_hw_context_from_implementation(handle);
+    
+    xdp::aie::driver_config meta_config = getAIEConfigMetadata();
 
-    XAie_Config cfg { 
-      getAIEConfigMetadata("hw_gen").get_value<uint8_t>(),        //xaie_base_addr
-      getAIEConfigMetadata("base_address").get_value<uint64_t>(),        //xaie_base_addr
-      getAIEConfigMetadata("column_shift").get_value<uint8_t>(),         //xaie_col_shift
-      getAIEConfigMetadata("row_shift").get_value<uint8_t>(),            //xaie_row_shift
-      getAIEConfigMetadata("num_rows").get_value<uint8_t>(),             //xaie_num_rows,
-      getAIEConfigMetadata("num_columns").get_value<uint8_t>(),          //xaie_num_cols,
-      getAIEConfigMetadata("shim_row").get_value<uint8_t>(),             //xaie_shim_row,
-      getAIEConfigMetadata("reserved_row_start").get_value<uint8_t>(),   //xaie_res_tile_row_start,
-      getAIEConfigMetadata("reserved_num_rows").get_value<uint8_t>(),    //xaie_res_tile_num_rows,
-      getAIEConfigMetadata("aie_tile_row_start").get_value<uint8_t>(),   //xaie_aie_tile_row_start,
-      getAIEConfigMetadata("aie_tile_num_rows").get_value<uint8_t>(),    //xaie_aie_tile_num_rows
-      {0}                                                   // PartProp
+    XAie_Config cfg {
+      meta_config.hw_gen,
+      meta_config.base_address,
+      meta_config.column_shift,
+      meta_config.row_shift,
+      meta_config.num_rows,
+      meta_config.num_columns,
+      meta_config.shim_row,
+      meta_config.mem_row_start,
+      meta_config.mem_num_rows,
+      meta_config.aie_tile_row_start,
+      meta_config.aie_tile_num_rows,
+      {0} // PartProp
     };
 
     auto regValues = parseMetrics();
@@ -142,9 +145,9 @@ namespace xdp {
     
       std::vector<tile_type> tiles;
       if (type == module_type::shim) {
-        tiles = aie::getInterfaceTiles(aie_meta, "all", "all", "", -1);
+        tiles = filetype->getInterfaceTiles("all", "all", "", -1);
       } else {
-        tiles = aie::getTiles(aie_meta,"all", type, "all");
+        tiles = filetype->getTiles("all", type, "all");
       }
 
       if (tiles.empty()) {
@@ -179,6 +182,52 @@ namespace xdp {
     for (int i = 0; i < op_profile_data.size(); i++) {
       op->profile_data[i] = op_profile_data[i];
     }
+
+
+    xrt_core::message::send(severity_level::info, "XRT", "Calling AIE Debug at application beginning!.");
+    XAie_StartTransaction(&aieDevInst, XAIE_TRANSACTION_DISABLE_AUTO_FLUSH);
+    // Profiling is 3rd custom OP
+    XAie_RequestCustomTxnOp(&aieDevInst);
+    XAie_RequestCustomTxnOp(&aieDevInst);
+    auto read_op_code_ = XAie_RequestCustomTxnOp(&aieDevInst);
+
+    try {
+      mKernel = xrt::kernel(context, "XDP_KERNEL");  
+    } catch (std::exception &e){
+      std::stringstream msg;
+      msg << "Unable to find XDP_KERNEL from hardware context. Not configuring AIE Debug. " << e.what() ;
+      xrt_core::message::send(severity_level::warning, "XRT", msg.str());
+      return;
+    }
+
+    XAie_AddCustomTxnOp(&aieDevInst, (uint8_t)read_op_code_, (void*)op, op_size);
+    uint8_t *txn_ptr = XAie_ExportSerializedTransaction(&aieDevInst, 1, 0);
+    op_buf instr_buf;
+    instr_buf.addOP(transaction_op(txn_ptr));
+
+    // this BO stores polling data and custom instructions
+    xrt::bo instr_bo;
+    try {
+      instr_bo = xrt::bo(context.get_device(), instr_buf.ibuf_.size(), XCL_BO_FLAGS_CACHEABLE, mKernel.group_id(1));
+    } catch (std::exception &e){
+      std::stringstream msg;
+      msg << "Unable to create the instruction buffer for polling during AIE Debug. " << e.what() << std::endl;
+      xrt_core::message::send(severity_level::warning, "XRT", msg.str());
+      return;
+    }
+
+    instr_bo.write(instr_buf.ibuf_.data());
+    instr_bo.sync(XCL_BO_SYNC_BO_TO_DEVICE);
+    auto run = mKernel(CONFIGURE_OPCODE, instr_bo, instr_bo.size()/sizeof(int), 0, 0, 0, 0);
+    try {
+      run.wait2();
+    } catch (std::exception &e) {
+      std::stringstream msg;
+      msg << "Unable to successfully execute AIE Debug polling kernel. " << e.what() << std::endl;
+      xrt_core::message::send(severity_level::warning, "XRT", msg.str());
+    }
+
+    XAie_ClearTransaction(&aieDevInst);
   }
 
 
@@ -317,9 +366,12 @@ namespace xdp {
     free(op);
   }
 
-  boost::property_tree::ptree AieDebugPlugin::getAIEConfigMetadata(std::string config_name) {
-    std::string query = "aie_metadata.driver_config." + config_name;
-    return aie_meta.get_child(query);
+
+
+  aie::driver_config
+  AieDebugPlugin::getAIEConfigMetadata()
+  {
+    return filetype->getDriverConfig();
   }
 
 }  // end namespace xdp
