@@ -45,19 +45,12 @@ namespace xdp {
       bool checkAieDevice(uint64_t deviceId, void* handle);
 
       bool setMetricsSettings(uint64_t deviceId, void* handle);
-      uint16_t getRelativeRow(uint16_t absRow);
-      module_type getModuleType(uint16_t absRow, XAie_ModuleType mod);
-      bool isInputSet(const module_type type, const std::string metricSet);
       bool isValidType(module_type type, XAie_ModuleType mod);
-      bool isStreamSwitchPortEvent(const XAie_Events event);
-      bool isPortRunningEvent(const XAie_Events event);
       bool isPortTlastEvent(const XAie_Events event);
       uint8_t getPortNumberFromEvent(XAie_Events event);
       void printTileModStats(xaiefal::XAieDev* aieDevice, 
                              const tile_type& tile, 
                              const XAie_ModuleType mod);
-      void modifyEvents(module_type type, uint16_t subtype, 
-                        uint8_t channel, std::vector<XAie_Events>& events);
       void configGroupEvents(XAie_DevInst* aieDevInst,
                              const XAie_LocType loc,
                              const XAie_ModuleType mod,
@@ -96,7 +89,6 @@ namespace xdp {
       XAie_DevInst*     aieDevInst = nullptr;
       xaiefal::XAieDev* aieDevice  = nullptr;    
 
-      std::map<module_type, uint32_t> mCounterBases;
       std::map<std::string, std::vector<XAie_Events>> mCoreStartEvents;
       std::map<std::string, std::vector<XAie_Events>> mCoreEndEvents;
       std::map<std::string, std::vector<XAie_Events>> mMemoryStartEvents;
