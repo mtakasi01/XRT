@@ -201,11 +201,8 @@ test(xrt_core::device* device)
     throw xrt_core::system_error(EINVAL, "mem_topology is invalid, cannot validate p2p");
 
   // support memory types
-  // p2p is not supported for DDR on u280
   auto vbnv = xrt_core::device_query<xrt_core::query::rom_vbnv>(device);
   std::vector<std::string> supported = { "HBM", "bank" };
-  if (vbnv.find("_U280_") == std::string::npos)
-    supported.push_back("DDR");
 
   for (int32_t i = 0; i < mt->m_count; ++i) {
     if (!mt->m_mem_data[i].m_used)

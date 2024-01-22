@@ -2411,7 +2411,6 @@ namespace xclhwemhal2 {
         || vbnv.find("u200_xdma_201830")        != std::string::npos
         || vbnv.find("u250_qep_201910")         != std::string::npos
         || vbnv.find("u250_xdma_201830")        != std::string::npos
-        || vbnv.find("u280_xdma_201920")        != std::string::npos
         || vbnv.find("u50_xdma_201910")         != std::string::npos
         || vbnv.find("u50_xdma_201920")         != std::string::npos))
       return true;

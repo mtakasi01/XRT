@@ -18,7 +18,7 @@ boost::property_tree::ptree
 TestAuxConnection::run(std::shared_ptr<xrt_core::device> dev)
 {
   boost::property_tree::ptree ptree = get_test_header();
-  const std::vector<std::string> auxPwrRequiredDevice = { "VCU1525", "U200", "U250", "U280" };
+  const std::vector<std::string> auxPwrRequiredDevice = { "VCU1525", "U200", "U250" };
 
   std::string name;
   uint64_t max_power = 0;
@@ -43,7 +43,7 @@ TestAuxConnection::run(std::shared_ptr<xrt_core::device> dev)
       return ptree;
   }
 
-  //check aux cable if board u200, u250, u280
+  //check aux cable if board u200, u250
   if (max_power == 0) {
     logger(ptree, "Warning", "Aux power is not connected");
     logger(ptree, "Warning", "Device is not stable for heavy acceleration tasks");

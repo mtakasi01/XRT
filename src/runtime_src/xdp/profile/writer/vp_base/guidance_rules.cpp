@@ -221,8 +221,7 @@ namespace {
       //  platforms that have HBM
       std::string deviceName =
         db->getStaticInfo().getSoftwareEmulationDeviceName() ;
-      if (deviceName.find("u280") != std::string::npos ||
-          deviceName.find("u50")  != std::string::npos) {
+      if (deviceName.find("u50")  != std::string::npos) {
         hasHBM = true ;
       }
     }

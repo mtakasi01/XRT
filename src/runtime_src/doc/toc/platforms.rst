@@ -34,13 +34,12 @@ XRT supports following PCIe based devices:
 
 1. U200
 2. U250
-3. U280
-4. U50
-5. AWS F1
-6. U30
-7. U25
-8. VCK5000
-9. Advantech VEGA-4000/4002
+3. U50
+4. AWS F1
+5. U30
+6. U25
+7. VCK5000
+8. Advantech VEGA-4000/4002
 
 PCIe based platforms are supported on x86_64, PPC64LE and AARCH64 host architectures. The
 platform is comprised of physical partitions called *Shell* and *User*. The Shell has two physical

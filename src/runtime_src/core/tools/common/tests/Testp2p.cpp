@@ -176,9 +176,7 @@ Testp2p::run(std::shared_ptr<xrt_core::device> dev)
   for (auto& mem : boost::make_iterator_range(mem_topo->m_mem_data, mem_topo->m_mem_data + mem_topo->m_count)) {
     auto midx = std::distance(mem_topo->m_mem_data, &mem);
     std::vector<std::string> sup_list = { "HBM", "bank", "DDR" };
-    //p2p is not supported for DDR on u280
-    if (name.find("_u280_") != std::string::npos)
-      sup_list.pop_back();
+    sup_list.pop_back();
 
     const std::string mem_tag(reinterpret_cast<const char *>(mem.m_tag));
     for (const auto& x : sup_list) {
