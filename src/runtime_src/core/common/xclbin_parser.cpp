@@ -17,7 +17,7 @@
 #include "xclbin_parser.h"
 #include "config_reader.h"
 #include "error.h"
-
+#include <iostream>
 #include <algorithm>
 #include <map>
 #include <regex>
@@ -263,15 +263,20 @@ get_address_range(const pt::ptree& xml_kernel)
 {
   constexpr auto default_address_range = 64_kb;
   size_t address_range = default_address_range;
-  for (auto& xml_port : xml_kernel) {
-    if (xml_port.first != "port")
+  std::cout<<"* * * * * * * * * * out side for loop"<<std::endl;
+  for (auto& xml_inst : xml_kernel) {
+    if (xml_inst.first != "instance") {
+      std::cout<<"* * * * * * * * * *"<<xml_inst.first<<std::endl;
       continue;
-
-    // one AXI slave port per kernel
-    if (xml_port.second.get<std::string>("<xmlattr>.mode") == "slave") {
-      address_range = convert(xml_port.second.get<std::string>("<xmlattr>.range"));
-      break;
     }
+    for (auto& it : xml_inst.second) {
+       if (it.first != "addrRemap")
+         continue;
+       address_range = convert(it.second.get<std::string>("<xmlattr>.range"));
+       std::cout<<"* * * * * * * * * *"<<address_range<<std::endl;
+       break;
+    }
+    break;
   }
   return address_range;
 }

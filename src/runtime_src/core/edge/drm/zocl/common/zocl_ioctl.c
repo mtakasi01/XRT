@@ -81,7 +81,6 @@ zocl_info_cu_ioctl(struct drm_device *ddev, void *data, struct drm_file *filp)
 	apt_idx = get_apt_index_by_addr(zdev, args->paddr);
 	if (apt_idx != -EINVAL)
 		cu_idx = apts[apt_idx].cu_idx;
-
 out:
 	args->paddr = addr;
 	args->apt_idx = apt_idx;
