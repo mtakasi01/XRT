@@ -270,11 +270,11 @@ zocl_read_aieresbin(struct drm_zocl_dev *zdev, struct axlf* axlf, char __user *x
 		}
 
 		//Call the AIE Driver API 
-		int ret = aie_part_rscmgr_set_static_range(zdev->aie->aie_dev, start_col, num_col, data_portion);
-		if (ret != 0) {
-			vfree(data_portion);
-			return ret;
-		}
+		//int ret = aie_part_rscmgr_set_static_range(zdev->aie->aie_dev, start_col, num_col, data_portion);
+		//if (ret != 0) {
+		//	vfree(data_portion);
+		//	return ret;
+		//}
 		vfree(data_portion);
         	header = xrt_xclbin_get_section_hdr_next(axlf, AIE_RESOURCES_BIN, header);
 	}
