@@ -18,7 +18,7 @@
 struct zocl_xclbin {
 	int		zx_refcnt;
 	char		*zx_dtbo_path;
-	void		*zx_uuid;
+	char		zx_uuid[UUID_SIZE];
 };
 
 int zocl_xclbin_init(struct drm_zocl_slot *slot);

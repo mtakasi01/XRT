@@ -983,22 +983,10 @@ int
 zocl_xclbin_set_uuid(struct drm_zocl_dev *zdev,
 		     struct drm_zocl_slot *slot, void *uuid)
 {
-	xuid_t *zx_uuid = slot->slot_xclbin->zx_uuid;
-
-	if (zx_uuid) {
-		vfree(zx_uuid);
-		zx_uuid = NULL;
-	}
-
-	zx_uuid = vmalloc(UUID_SIZE * sizeof(u8));
-	if (!zx_uuid)
-		return -ENOMEM;
-
-	uuid_copy(zx_uuid, uuid);
-	write_lock(&zdev->attr_rwlock);
-	slot->slot_xclbin->zx_uuid = zx_uuid;
-	slot->slot_xclbin->zx_refcnt = 0;
-	write_unlock(&zdev->attr_rwlock);
+        write_lock(&zdev->attr_rwlock);
+        memcpy(slot->slot_xclbin->zx_uuid, uuid, sizeof(UUID_SIZE*sizeof(u8)));
+        slot->slot_xclbin->zx_refcnt = 0;
+        write_unlock(&zdev->attr_rwlock);
 	return 0;
 }
 
@@ -1023,7 +1011,6 @@ zocl_xclbin_init(struct drm_zocl_slot *slot)
 
 	z_xclbin->zx_refcnt = 0;
 	z_xclbin->zx_dtbo_path = NULL;
-	z_xclbin->zx_uuid = NULL;
 
 	slot->slot_xclbin = z_xclbin;
 
@@ -1045,8 +1032,7 @@ zocl_xclbin_fini(struct drm_zocl_dev *zdev, struct drm_zocl_slot *slot)
 	if (!slot->slot_xclbin)
 		return;
 
-	vfree(slot->slot_xclbin->zx_uuid);
-	slot->slot_xclbin->zx_uuid = NULL;
+       memset(slot->slot_xclbin->zx_uuid, 0, sizeof(UUID_SIZE));
 	vfree(slot->slot_xclbin);
 	slot->slot_xclbin = NULL;
 
